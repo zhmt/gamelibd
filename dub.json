@@ -1,0 +1,10 @@
+{
+	"name": "gamelibd",
+	"targetType": "sourceLibrary",
+	"description": "A minimal D application.",
+	"copyright": "Copyright © 2015, zhmt",
+	"authors": ["zhmt"],
+	"lflags":["-L../bin"],
+	"workingDirectory":"../bin",
+	"targetPath":"../bin",
+}
