@@ -153,7 +153,6 @@ private :
 
 class TimerTask : ExceptionSafeFiber
 {
-	alias void delegate(TimerTask) FUNC;
 	public long startTime;
 
 	public this(long startTime)

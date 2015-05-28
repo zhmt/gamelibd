@@ -28,10 +28,25 @@ version(Posix)
 		enforce(err!=-1,new StdioException("setNonBlock failed."));
 	}
 
-	void setSockOpt(int sock,int opt)
+	void setSockOpt(int sock,int param,int opt)
 	{
+		//SOL_SOCKET
 		int on = 1;
-		setsockopt(sock, SOL_SOCKET, opt, &on, on.sizeof);
+		int err = setsockopt(sock, param, opt, &on, on.sizeof);
+		enforce(err!=-1,new StdioException("setSockOpt failed."));
+	}
+
+	void setTcpNodelay(int sock)
+	{
+		//setsockopt(m_sock,IPPROTO_TCP,TCP_NODELAY,(char *)&flag,sizeof(flag))
+		import core.sys.posix.netinet.tcp;
+		setSockOpt(sock,IPPROTO_TCP,TCP_NODELAY);
+	}
+
+	void setSoreuseaddress(int sock)
+	{
+		import core.sys.posix.netinet.tcp;
+		setSockOpt(sock,SOL_SOCKET,SO_REUSEADDR);
 	}
 
 	int createUdpSocket()
@@ -71,6 +86,7 @@ version(Posix)
 		int sock = socket(AF_INET,SOCK_STREAM,0);
 		enforce(sock!=-1,new StdioException("createTcpSocket failed."));
 		setNonBlock(sock);
+		setTcpNodelay(sock);
 		return sock;
 	}
 
@@ -79,7 +95,7 @@ version(Posix)
 		int sock = createTcpSocket();
 		scope(failure) close(sock);
 
-		setSockOpt(sock,SO_REUSEADDR);
+		setSoreuseaddress(sock);
 		addrtransform addr = parseIpPort(ip,port);
 		
 		enforce(bind(sock, cast(sockaddr*) &addr.addrin, addr.sizeof) != -1,

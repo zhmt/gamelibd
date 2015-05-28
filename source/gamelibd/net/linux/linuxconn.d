@@ -60,7 +60,9 @@ version(linux)
 	void selectAndProcessNetEvents(ulong maxWaitTimeInMs)
 	{
 		epoll_event[] evts = ConnGlobals.events[0..$];
+		//long now = utcNow();
 		int n = epoll_wait(ConnGlobals.epfd,&evts[0],ConnGlobals.MAX_EVENT_COUNT,cast(int)maxWaitTimeInMs);
+		//writeFlush(n);
 		if (n == -1)
 		{
 			writeFlush("kevent failed!");

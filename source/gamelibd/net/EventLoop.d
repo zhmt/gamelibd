@@ -98,7 +98,7 @@ public:
 				if(utcNow()>task.startTime)
 				{
 					timerTasks.removeFront();
-					task.run();
+					task.call();
 				}else
 				{
 					break;
@@ -109,7 +109,7 @@ public:
 				}
 			}
 
-			selectAndProcessNetEvents(4);
+			selectAndProcessNetEvents(1);
 		}
 	}
 }
