@@ -136,6 +136,28 @@ struct Ptr(T)
 
 class mem
 {
+	/**  allocate fixed size buffer */
+	public static ubyte[] allocate(int size)
+	{
+		import core.stdc.stdlib : malloc;
+		auto memory = malloc(size);
+		if(!memory)
+		{
+			import core.exception : onOutOfMemoryError;
+			onOutOfMemoryError();
+		}
+		ubyte[] ret = (cast(ubyte*)memory)[0..size];
+		return ret;
+	}
+
+	public static void dellocate(ubyte[] buf)
+	{
+		import core.stdc.stdlib : free;
+		
+		// free memory occupied by object
+		free(cast(void*)buf.ptr);
+	}
+
 	public static T heapAllocate(T, Args...) (Args args) 
 	{
 		import std.conv : emplace;

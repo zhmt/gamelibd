@@ -38,12 +38,14 @@ class LinkedList(T)
 
 	Node head;
 	Node tail;
+	int _size;
 
 	public this()
 	{
 		//init a blank head
 		head = new Node(null,null,null);
 		tail = head;
+		_size = 0;
 	}
 
 	public void addTail(T value)
@@ -51,11 +53,17 @@ class LinkedList(T)
 		Node node = new Node(value,tail,null);
 		tail.next = node;
 		tail = node;
+		_size ++;
 	}
 
 	public @property bool isEmpty()
 	{
 		return head == tail;
+	}
+
+	public @property int size()
+	{
+		return _size;
 	}
 
 	public T removeHead()
@@ -74,7 +82,51 @@ class LinkedList(T)
 		}
 
 //		writeFlush("remove from q");
+		_size--;
 		return ret;
+	}
+
+	public T get(int index)
+	{
+		if(index<0|| index>=_size)
+		{
+			throw new Exception("IndexOutOfBound");
+		}
+
+		Node tmp = head.next;
+		for(int i=0; i<=index; i++)
+		{
+			if(i==index)
+			{
+				return tmp.value;
+			}
+			tmp = tmp.next;
+		}
+		throw new Exception("IndexOutOfBound");
 	}
 }
 
+unittest 
+{
+	import std.exception;
+	void testGet()
+	{
+		LinkedList!string list = new LinkedList!string();
+		assertThrown( list.get(-1));
+		assertThrown( list.get(0));
+		list.addTail("a");
+		assert (list.get(0)=="a");
+		assert (list.size ==1);
+		list.addTail("b");
+		assert (list.get(0)=="a");
+		assert (list.get(1)=="b");
+		assert (list.size ==2);
+		list.addTail("c");
+		assert (list.get(0)=="a");
+		assert (list.get(1)=="b");
+		assert (list.get(2)=="c");
+		assert (list.size ==3);
+		assertThrown( list.get(3));
+		assertThrown( list.get(4));
+	}
+}
