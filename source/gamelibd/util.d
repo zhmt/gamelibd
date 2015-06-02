@@ -3,6 +3,7 @@
 import std.stdio;
 import gamelibd.mem;
 
+
 public static long utcNow()
 {
 	import std.datetime;
@@ -20,37 +21,37 @@ void writeFlush(T...)(T args)
 	stdout.flush();
 }
 
+class Node(T)
+{
+	public this(T value,Node last,Node next)
+	{
+		this.value = value;
+		this.last = last;
+		this.next = next;
+	}
+	
+	T value;
+	Node!T last;
+	Node!T next;
+}
+
 class LinkedList(T)
 {
-	class Node
-	{
-		public this(T value,Node last,Node next)
-		{
-			this.value = value;
-			this.last = last;
-			this.next = next;
-		}
-
-		T value;
-		Node last;
-		Node next;
-	}
-
-	Node head;
-	Node tail;
+	Node!T head;
+	Node!T tail;
 	int _size;
 
 	public this()
 	{
 		//init a blank head
-		head = new Node(null,null,null);
+		head = new Node!T(null,null,null);
 		tail = head;
 		_size = 0;
 	}
 
 	public void addTail(T value)
 	{
-		Node node = new Node(value,tail,null);
+		Node!T node = new Node!T(value,tail,null);
 		tail.next = node;
 		tail = node;
 		_size ++;
@@ -68,7 +69,7 @@ class LinkedList(T)
 
 	public T removeHead()
 	{
-		Node tmp = head.next;
+		Node!T tmp = head.next;
 		scope(exit) delete tmp;
 		T ret = tmp.value;
 
@@ -93,7 +94,7 @@ class LinkedList(T)
 			throw new Exception("IndexOutOfBound");
 		}
 
-		Node tmp = head.next;
+		Node!T tmp = head.next;
 		for(int i=0; i<=index; i++)
 		{
 			if(i==index)
@@ -111,6 +112,13 @@ unittest
 	import std.exception;
 	void testGet()
 	{
+		LinkedList!string list1 = new LinkedList!string();
+		assertThrown( list1.get(-1));
+		assertThrown( list1.get(0));
+		list1.addTail("a");
+		assert (list1.get(0)=="a");
+
+
 		LinkedList!string list = new LinkedList!string();
 		assertThrown( list.get(-1));
 		assertThrown( list.get(0));
@@ -129,4 +137,6 @@ unittest
 		assertThrown( list.get(3));
 		assertThrown( list.get(4));
 	}
+
+	testGet();
 }

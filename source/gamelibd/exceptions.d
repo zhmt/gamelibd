@@ -34,3 +34,12 @@ class EofException : IoException
 	}
 }
 
+class IndexOutOfBoundException : Exception
+{
+	this(long index, long max)
+	{
+		import std.string;
+		super(format("%s exceeds %s.",index, max));
+	}
+}
+

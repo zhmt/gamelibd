@@ -6,7 +6,6 @@ import gamelibd.net.macconn;
 import gamelibd.net.linux.linuxconn;
 
 
-class A{}
 
 class EventLoop
 {
