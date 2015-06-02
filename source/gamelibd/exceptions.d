@@ -1,45 +1,29 @@
 ﻿module gamelibd.exceptions;
 
+public mixin template ExceptionCtorMixin() {
+	this(string msg = null, Throwable next = null) { super(msg, next); }
+	this(string msg, string file, size_t line, Throwable next = null) {
+		super(msg, file, line, next);
+	}
+}
+
 class NullPointerException : Exception 
 {
-	this()
-	{
-		super("NullPointerException");
-	}
-	
-	this(string msg)
-	{
-		super("NullPointerException" ~ msg);
-	}
+	mixin ExceptionCtorMixin;
 }
 
 class IoException : Exception
 {
-	this()
-	{
-		super("NetException");
-	}
-	
-	this(string msg)
-	{
-		super("NullPointerException " ~ msg);
-	}
+	mixin ExceptionCtorMixin;
 }
 
 class EofException : IoException
 {
-	this()
-	{
-		super("EofException");
-	}
+	mixin ExceptionCtorMixin;
 }
 
 class IndexOutOfBoundException : Exception
 {
-	this(long index, long max)
-	{
-		import std.string;
-		super(format("%s exceeds %s.",index, max));
-	}
+	mixin ExceptionCtorMixin;
 }
 

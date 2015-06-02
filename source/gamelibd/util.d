@@ -2,6 +2,8 @@
 
 import std.stdio;
 import gamelibd.mem;
+import std.exception;
+import gamelibd.exceptions;
 
 
 public static long utcNow()
@@ -89,10 +91,8 @@ class LinkedList(T)
 
 	public T get(int index)
 	{
-		if(index<0|| index>=_size)
-		{
-			throw new Exception("IndexOutOfBound");
-		}
+		//if(index<0|| index>=_size)
+		enforce!IndexOutOfBoundException(index>=0&&index<_size);
 
 		Node!T tmp = head.next;
 		for(int i=0; i<=index; i++)
@@ -103,7 +103,8 @@ class LinkedList(T)
 			}
 			tmp = tmp.next;
 		}
-		throw new Exception("IndexOutOfBound");
+		enforce!IndexOutOfBoundException(true);
+		return tmp.value;
 	}
 }
 

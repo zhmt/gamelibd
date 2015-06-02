@@ -6,6 +6,7 @@ import gamelibd.MemPool;
 import gamelibd.exceptions;
 import std.exception:enforce;
 
+/** An buffer that could automatically extend or shrink */
 class Buf
 {
 	private ubyte[][] sink;
@@ -22,7 +23,15 @@ class Buf
 	}
 
 	@property public long readIndex() { return ridx; }
+	@property public void readIndex(long index) {
+		this.ridx=index; 
+		this.rbidx = ridx/MemPool.poolOneK.blockSize;
+	}
 	@property public long writeIndex() { return widx; }
+	@property public void writeIndex(long index){
+		this.widx=index; 
+		this.wbidx = widx/MemPool.poolOneK.blockSize; 
+	}
 
 	private void reinit()
 	{
@@ -35,18 +44,29 @@ class Buf
 		lastBlokIndex = 0;
 	}
 
-	public void set(int index,ubyte[])
+	public void set(long index,ubyte[] data)
 	{
+		if(data is null) return;
 
+		ensureWriteSpace(data.length,index);
+		copyArrIn(data,index/MemPool.poolOneK.blockSize,index);
+	}
+
+	public void set(long index,ubyte data)
+	{
+		ensureWriteSpace(1,index);
+
+		sink[index/MemPool.poolOneK.blockSize][index%MemPool.poolOneK.blockSize] = data;
 	}
 
 	public ubyte get(long index)
 	{
-		if(index>=widx)
-		{
-			throw new IndexOutOfBoundException(index,widx);
-		}
+		enforce!IndexOutOfBoundException(index<widx);
 		return sink[index/MemPool.poolOneK.blockSize][index%MemPool.poolOneK.blockSize];
+	}
+
+	public void compress()
+	{
 	}
 
 	public void release()
@@ -104,8 +124,7 @@ class Buf
 		while(toCopy>0)
 		{
 			block = sink[bidx];
-			if(block is null)
-				throw new NullPointerException(std.string.format("%s",toCopy));
+			enforce!NullPointerException(block !is null);
 			blockOffset = idx%block.length;
 			blocksize = block.length - blockOffset;
 
@@ -201,13 +220,60 @@ unittest
 		testAppendByte(n);
 	}
 
+	void testSet(long N)
+	{
+		Buf buf = new Buf;
+		ubyte[] bytes =  [1,2,3,4,5,6,7,8,9,10,11,12,13]; 
+		N = N/bytes.length;
+		int mod = 256;
+		
+		for(int i=0; i<N;i++)
+		{
+			buf.set(i*bytes.length,bytes);
+		}
+		buf.writeIndex = N*bytes.length;
+
+		for(int i=0; i<N;i++)
+		{
+			for(int ii=0; ii<bytes.length; ii++)
+			{
+				assert(buf.get(i*bytes.length+ii)==bytes[ii]);
+			}
+		}
+
+		
+		buf.release();
+	}
+
+	void testSetByte(long N)
+	{
+		Buf buf = new Buf;
+		int mod = 256;
+		
+		for(int i=0; i<N;i++)
+		{
+			buf.set(i,cast(ubyte)(i%mod));
+		}
+		buf.writeIndex = N;
+		
+		for(int i=0; i<N;i++)
+		{
+			assert(buf.get(i) == i%mod);
+		}
+		
+		
+		buf.release();
+	}
 
 	testAppend();
 	testMultiBlockAppend(4*MemPool.poolOneK.blockSize);
 	testMultiBlockAppend(1*1024*1024);
 	testAppendByte(4*MemPool.poolOneK.blockSize);
 	testBigMem(1*1024*1024); //1M
-
+	testSet(4*MemPool.poolOneK.blockSize);
+	testSet(1*1024*1024);
+	testSetByte(4*MemPool.poolOneK.blockSize);
+	testSetByte(1*1024*1024);
 }
 
 
