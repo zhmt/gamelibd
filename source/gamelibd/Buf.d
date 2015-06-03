@@ -44,6 +44,7 @@ class Buf
 		lastBlokIndex = 0;
 	}
 
+	/** change data in buf,but dont move writeIndex */
 	public void set(long index,ubyte[] data)
 	{
 		if(data is null) return;
@@ -55,7 +56,6 @@ class Buf
 	public void set(long index,ubyte data)
 	{
 		ensureWriteSpace(1,index);
-
 		sink[index/MemPool.poolOneK.blockSize][index%MemPool.poolOneK.blockSize] = data;
 	}
 
@@ -65,6 +65,14 @@ class Buf
 		return sink[index/MemPool.poolOneK.blockSize][index%MemPool.poolOneK.blockSize];
 	}
 
+	/** copy data into buf */
+	public ubyte get(long index,ubyte[] buf)
+	{
+	}
+
+	/** Drop data that has been read, and release memory ocupied by them. 
+	This could make readIndex and writeIndex change.
+	  */
 	public void compress()
 	{
 	}
@@ -90,7 +98,7 @@ class Buf
 		}
 	}
 
-
+	/** add data to tail,and move writeIndex forward  */
 	public void append(ubyte data)
 	{
 		ensureWriteSpace(1,widx);
@@ -112,6 +120,25 @@ class Buf
 		copyArrIn(data,wbidx,widx);
 		widx += data.length;
 		wbidx = widx/MemPool.poolOneK.blockSize;
+	}
+
+	/** read a byte from buf and move readIndex forward  */
+	public ubyte read()
+	{
+		enforce!IndexOutOfBoundException(ridx<widx);
+		ubyte ret = sink[rbidx][ridx%MemPool.poolOneK.blockSize];
+		ridx++;
+		if(ridx%MemPool.poolOneK.blockSize==0)
+		{
+			rbidx++;
+		}
+		return ret;
+	}
+
+	/** how much data can i read from buffer now */
+	public @property long readAvailable()
+	{
+		return widx - ridx;
 	}
 
 	private void copyArrIn(ubyte[] data,long bidx,long idx)
@@ -241,7 +268,6 @@ unittest
 			}
 		}
 
-		
 		buf.release();
 	}
 
@@ -265,15 +291,36 @@ unittest
 		buf.release();
 	}
 
+	void testRead(int N)
+	{
+		Buf buf = new Buf;
+		int mod = 256;
+		for(int i=0; i<N;i++)
+		{
+			buf.append(cast(ubyte)(i%mod));
+			assert(buf.readAvailable==i+1);
+		}
+		for(int i=0; i<N; i++)
+		{
+			//writeFlush(i,",",buf.get(i),",",i%mod);
+			assert(buf.read() == i%mod);
+			assert(buf.readAvailable==N-i-1);
+		}
+		buf.release();
+	}
+
 	testAppend();
 	testMultiBlockAppend(4*MemPool.poolOneK.blockSize);
 	testMultiBlockAppend(1*1024*1024);
 	testAppendByte(4*MemPool.poolOneK.blockSize);
 	testBigMem(1*1024*1024); //1M
+
 	testSet(4*MemPool.poolOneK.blockSize);
 	testSet(1*1024*1024);
 	testSetByte(4*MemPool.poolOneK.blockSize);
 	testSetByte(1*1024*1024);
+
+	testRead(1*1024*1024);
 }
 
 
