@@ -39,7 +39,8 @@ class MemPool
 
 	public void returnBlock(ubyte[] block)
 	{
-		enforce(block.length==_blockSize,"size fo block to be recycled is mismatched.");
+		import std.string;
+		enforce(block.length==_blockSize,format ("size fo block to be recycled is mismatched : expects %s but %s got. ",_blockSize,block.length));
 
 		if(list.size>=maxBlockNum)
 		{

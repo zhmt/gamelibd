@@ -1,10 +1,6 @@
 ﻿<Properties StartupItem="dub.json">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Default" PreferredExecutionTarget="unittest" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="source/gamelibd/MemPool.d">
-    <Files>
-      <File FileName="source/gamelibd/MemPool.d" Line="17" Column="52" />
-    </Files>
-  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workbench />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
