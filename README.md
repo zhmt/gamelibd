@@ -15,3 +15,11 @@ developing:
 2、异步dns
 3、协程通信机制
 
+
+benchmark:
+
+the gamelibdtest running in virtual machine, comes this result:
+
+67000response/second, when buffer is 100bytes
+
+you can run it on your pc.
